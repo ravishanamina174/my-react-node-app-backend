@@ -1,0 +1,13 @@
+fi8ZgC0i5FuhCIYh
+
+
+mongodb+srv://raveeshanamina48:fi8ZgC0i5FuhCIYh@cluster0.ihbh8zg.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+
+
+
+Mongodb to vs cord password = 
+mongodb+srv://raveeshanamina48:fi8ZgC0i5FuhCIYh@cluster0.ihbh8zg.mongodb.net/
+
+mongodb+srv://raveeshanamina48:fi8ZgC0i5FuhCIYh@cluster0.mongodb.net/?retryWrites=true&w=majority
+
+
