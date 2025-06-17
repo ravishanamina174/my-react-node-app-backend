@@ -9,12 +9,12 @@ const reviewSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    //! 
-    productId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: true,
-    },
+    
+    // productId: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Product",
+    //     required: true,
+    // },
 })
 
 const Review = mongoose.model("Review", reviewSchema);
