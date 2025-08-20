@@ -2,11 +2,11 @@
   "name": "fed-2-back-end",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon src/index.ts",
-    "build": "npm install && tsc",
-    "start": "node ./dist/index.js",
+    "build": "tsc",
+    "start": "node dist/index.js",
     "seed": "ts-node src/infrastructure/db/seed.ts"
   },
   "author": "",
