@@ -6,16 +6,19 @@ import {
   updateProductById,
   deleteProductById,
   uploadProductImage,
+  getProductsForSearchQuery,
+  getShopProducts,
 } from "../application/product";
 import isAuthenticated from "./middleware/authentication-middleware";
 import { isAdmin } from "./middleware/authorization-middleware";
 
 const productRouter = express.Router();
 
-productRouter
-  .route("/")
-  .get(getAllProducts)
-  .post(isAuthenticated, isAdmin, createProduct);
+productRouter.get("/", getAllProducts);
+productRouter.get("/shop", getShopProducts);
+productRouter.post("/", isAuthenticated, isAdmin, createProduct);
+
+productRouter.get("/search", getProductsForSearchQuery);
 
 productRouter
   .route("/:id")
@@ -23,7 +26,8 @@ productRouter
   .put(updateProductById)
   .delete(deleteProductById);
 
-productRouter.route("/images")
-.post( uploadProductImage);    
+productRouter
+  .route("/images")
+  .post(uploadProductImage);
 
 export default productRouter;

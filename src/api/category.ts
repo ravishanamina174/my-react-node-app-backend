@@ -10,7 +10,8 @@ import isAuthenticated from "./middleware/authentication-middleware";
 
 const categoryRouter = express.Router();
 
-categoryRouter.route("/").get(getAllCategories).post(isAuthenticated, createCategory);
+categoryRouter.get("/", getAllCategories);
+categoryRouter.post("/", isAuthenticated, createCategory);
 
 categoryRouter
   .route("/:id")

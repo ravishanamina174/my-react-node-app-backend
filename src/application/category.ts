@@ -5,29 +5,51 @@ import NotFoundError from "../domain/errors/not-found-error";
 
 import { Request, Response, NextFunction } from "express";
 
-const getAllCategories = async ( req:Request, res:Response, next:NextFunction) => {
+const getAllCategories = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const categories = await Category.find();
-    res.json(categories);
+    const categories = await Category.find().sort({ name: 1 });
+    res.json({
+      success: true,
+      data: categories
+    });
   } catch (error) {
     next(error);
   }
 };
 
-const createCategory = async (req:Request, res:Response, next:NextFunction) => {
+const createCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const newCategory = req.body;
     if (!newCategory.name) {
       throw new ValidationError("Category name is required");
     }
-    await Category.create(newCategory);
-    res.status(201).json(newCategory);
+    
+    // Generate slug from name
+    const slug = newCategory.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    
+    const category = await Category.create({ 
+      ...newCategory, 
+      slug 
+    });
+    res.status(201).json(category);
   } catch (error) {
     next(error);
   }
 };
 
-const getCategoryById = async (req:Request, res:Response, next:NextFunction) => {
+const getCategoryById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) {
@@ -39,7 +61,11 @@ const getCategoryById = async (req:Request, res:Response, next:NextFunction) => 
   }
 };
 
-const updateCategoryById = async (req:Request, res:Response, next:NextFunction) => {
+const updateCategoryById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const category = await Category.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -53,7 +79,11 @@ const updateCategoryById = async (req:Request, res:Response, next:NextFunction) 
   }
 };
 
-const deleteCategoryById = async (req:Request, res:Response, next:NextFunction) => {
+const deleteCategoryById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const category = await Category.findByIdAndDelete(req.params.id);
     if (!category) {
