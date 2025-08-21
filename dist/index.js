@@ -108,20 +108,34 @@ else {
     // eslint-disable-next-line no-console
     console.warn("Clerk keys not set or not in production; auth middleware disabled. Set CLERK_SECRET_KEY and CLERK_PUBLISHABLE_KEY and NODE_ENV=production to enable.");
 }
+// CORS configuration
 var allowedOrigins = [
     "http://localhost:5173", // local frontend
-    "https://my-frontend-r.netlify.app", // deployed frontend
+    "https://my-frontend-r.netlify.app", // old netlify frontend
+    "https://my-react-node-app.vercel.app", // new vercel frontend
 ];
+// Add FRONTEND_URL from environment if it exists
+if (process.env.FRONTEND_URL) {
+    allowedOrigins.push(process.env.FRONTEND_URL);
+}
 app.use((0, cors_1.default)({
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) {
+            return callback(null, true);
         }
-        else {
-            callback(new Error("Not allowed by CORS"));
+        // Check if origin is in allowed list
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
         }
+        // Log blocked origins for debugging
+        console.log("CORS blocked origin: ".concat(origin));
+        console.log("Allowed origins: ".concat(allowedOrigins.join(', ')));
+        return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 // Stripe routes are mounted only if a secret key is present
 var STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;

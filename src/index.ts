@@ -43,21 +43,40 @@ if (CLERK_ENABLED) {
     "Clerk keys not set or not in production; auth middleware disabled. Set CLERK_SECRET_KEY and CLERK_PUBLISHABLE_KEY and NODE_ENV=production to enable."
   );
 }
+// CORS configuration
 const allowedOrigins = [
   "http://localhost:5173", // local frontend
-  "https://my-frontend-r.netlify.app", // deployed frontend
+  "https://my-frontend-r.netlify.app", // old netlify frontend
+  "https://my-react-node-app.vercel.app", // new vercel frontend
 ];
+
+// Add FRONTEND_URL from environment if it exists
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) {
+        return callback(null, true);
       }
+      
+      // Check if origin is in allowed list
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      
+      // Log blocked origins for debugging
+      console.log(`CORS blocked origin: ${origin}`);
+      console.log(`Allowed origins: ${allowedOrigins.join(', ')}`);
+      
+      return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   })
 );
 
