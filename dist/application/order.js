@@ -73,16 +73,13 @@ var createOrder = function (req, res, next) { return __awaiter(void 0, void 0, v
                 _a.trys.push([0, 3, , 4]);
                 data = req.body;
                 userId = req.userId;
-                console.log("=== Order Creation Debug ===");
-                console.log("Request userId:", userId);
-                console.log("Request body:", JSON.stringify(data, null, 2));
-                console.log("Request headers:", req.headers);
-                console.log("NODE_ENV:", process.env.NODE_ENV);
+                // Keep essential logging for production monitoring
+                if (process.env.NODE_ENV === "production") {
+                    console.log("Creating order for userId: ".concat(userId));
+                }
                 if (!userId) {
-                    console.log("No userId found in request");
                     throw new unauthorized_error_1.default("User not authenticated");
                 }
-                console.log("Creating order for userId:", userId);
                 validatedData = void 0;
                 try {
                     validatedData = (0, order_validation_1.validateCreateOrder)(data);

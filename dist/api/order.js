@@ -10,39 +10,6 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -169,132 +136,9 @@ exports.orderRouter.get("/debug/all", function (req, res, next) { return __await
         }
     });
 }); });
-// Test endpoint to verify authentication middleware
-exports.orderRouter.get("/debug/auth-test", authentication_middleware_1.default, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        try {
-            res.json({
-                success: true,
-                message: "Authentication middleware working",
-                reqUserId: req.userId,
-                reqAuth: req.auth,
-                nodeEnv: process.env.NODE_ENV,
-                clerkEnabled: Boolean(process.env.CLERK_SECRET_KEY && process.env.NODE_ENV === "production"),
-                clerkSecretExists: !!process.env.CLERK_SECRET_KEY,
-                clerkPublishableExists: !!process.env.CLERK_PUBLISHABLE_KEY
-            });
-        }
-        catch (error) {
-            next(error);
-        }
-        return [2 /*return*/];
-    });
-}); });
-// New debug endpoint to test Clerk authentication specifically
-exports.orderRouter.get("/debug/clerk-test", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var clerkAuth, clerkError;
-    return __generator(this, function (_a) {
-        try {
-            clerkAuth = null;
-            clerkError = null;
-            if (getAuth) {
-                try {
-                    clerkAuth = getAuth(req);
-                }
-                catch (error) {
-                    clerkError = error;
-                }
-            }
-            res.json({
-                success: true,
-                message: "Clerk authentication test",
-                reqAuth: req.auth,
-                reqUserId: req.userId,
-                clerkAuth: clerkAuth,
-                clerkError: clerkError ? clerkError.message : null,
-                nodeEnv: process.env.NODE_ENV,
-                clerkEnabled: Boolean(process.env.CLERK_SECRET_KEY && process.env.NODE_ENV === "production"),
-                clerkSecretExists: !!process.env.CLERK_SECRET_KEY,
-                clerkPublishableExists: !!process.env.CLERK_PUBLISHABLE_KEY,
-                headers: {
-                    authorization: req.headers.authorization,
-                    'x-clerk-auth-token': req.headers['x-clerk-auth-token'],
-                    cookie: req.headers.cookie ? 'present' : 'missing'
-                }
-            });
-        }
-        catch (error) {
-            next(error);
-        }
-        return [2 /*return*/];
-    });
-}); });
-// Test endpoint to create order without authentication (for debugging)
-exports.orderRouter.post("/debug/create-test-order", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var data, testUserId, validatedData, validateCreateOrder, validationError_1, transformedOrderItems, order, error_2;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 6, , 7]);
-                console.log("=== Debug Order Creation ===");
-                console.log("Request body:", req.body);
-                console.log("Request headers:", req.headers);
-                console.log("NODE_ENV:", process.env.NODE_ENV);
-                data = req.body;
-                testUserId = "debug_test_user_" + Date.now();
-                validatedData = void 0;
-                _a.label = 1;
-            case 1:
-                _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, Promise.resolve().then(function () { return __importStar(require("../domain/validation/order-validation")); })];
-            case 2:
-                validateCreateOrder = (_a.sent()).validateCreateOrder;
-                validatedData = validateCreateOrder(data);
-                return [3 /*break*/, 4];
-            case 3:
-                validationError_1 = _a.sent();
-                console.log("Validation error:", validationError_1);
-                return [2 /*return*/, res.status(400).json({
-                        error: "Validation failed",
-                        details: validationError_1.errors || validationError_1.message
-                    })];
-            case 4:
-                transformedOrderItems = validatedData.orderItems.map(function (item) { return ({
-                    product: item.productId,
-                    quantity: item.quantity,
-                    price: item.price,
-                    name: item.name
-                }); });
-                return [4 /*yield*/, Order_1.default.create({
-                        user: testUserId,
-                        orderItems: transformedOrderItems,
-                        shippingAddress: validatedData.shippingAddress,
-                        totalAmount: validatedData.totalAmount,
-                        status: validatedData.orderStatus || "pending",
-                        paymentStatus: validatedData.paymentStatus || "pending",
-                    })];
-            case 5:
-                order = _a.sent();
-                console.log("Test order created successfully:", order._id);
-                res.status(201).json({
-                    success: true,
-                    message: "Debug test order created",
-                    order: order,
-                    testUserId: testUserId
-                });
-                return [3 /*break*/, 7];
-            case 6:
-                error_2 = _a.sent();
-                console.error("Error creating debug order:", error_2);
-                next(error_2);
-                return [3 /*break*/, 7];
-            case 7: return [2 /*return*/];
-        }
-    });
-}); });
 // Temporary test endpoint for specific user orders
 exports.orderRouter.get("/debug/user/:userId", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var userId, orders, transformedOrders, error_3;
+    var userId, orders, transformedOrders, error_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -339,8 +183,8 @@ exports.orderRouter.get("/debug/user/:userId", function (req, res, next) { retur
                 });
                 return [3 /*break*/, 3];
             case 2:
-                error_3 = _a.sent();
-                next(error_3);
+                error_2 = _a.sent();
+                next(error_2);
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }
@@ -349,7 +193,7 @@ exports.orderRouter.get("/debug/user/:userId", function (req, res, next) { retur
 //getUserOrders
 // GET /api/orders/myorders
 exports.orderRouter.get("/myorders", authentication_middleware_1.default, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var userId, auth, allOrders, transformedOrders_1, groups_1, orders, transformedOrders, groups, error_4;
+    var userId, auth, allOrders, transformedOrders_1, groups_1, orders, transformedOrders, groups, error_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -441,9 +285,9 @@ exports.orderRouter.get("/myorders", authentication_middleware_1.default, functi
                 groups = groupByDate(transformedOrders);
                 return [2 /*return*/, res.json({ success: true, orders: transformedOrders, groups: groups })];
             case 4:
-                error_4 = _a.sent();
-                console.log("Error in myorders:", error_4);
-                next(error_4);
+                error_3 = _a.sent();
+                console.log("Error in myorders:", error_3);
+                next(error_3);
                 return [3 /*break*/, 5];
             case 5: return [2 /*return*/];
         }
@@ -451,7 +295,7 @@ exports.orderRouter.get("/myorders", authentication_middleware_1.default, functi
 }); });
 // GET /api/orders/allorders
 exports.orderRouter.get("/allorders", authentication_middleware_1.default, authorization_middleware_1.isAdmin, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var rawOrders, clerkEnabled_1, userMap_1, uniqueUserIds, userEntries, orders, groups, error_5;
+    var rawOrders, clerkEnabled_1, userMap_1, uniqueUserIds, userEntries, orders, groups, error_4;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -517,8 +361,8 @@ exports.orderRouter.get("/allorders", authentication_middleware_1.default, autho
                 groups = groupByDate(orders);
                 return [2 /*return*/, res.json({ success: true, orders: orders, groups: groups })];
             case 4:
-                error_5 = _a.sent();
-                next(error_5);
+                error_4 = _a.sent();
+                next(error_4);
                 return [3 /*break*/, 5];
             case 5: return [2 /*return*/];
         }

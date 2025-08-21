@@ -39,18 +39,14 @@ const createOrder = async (req: Request, res: Response, next: NextFunction) => {
     // Get userId from the authenticated request (set by middleware)
     const userId = (req as any).userId;
     
-    console.log("=== Order Creation Debug ===");
-    console.log("Request userId:", userId);
-    console.log("Request body:", JSON.stringify(data, null, 2));
-    console.log("Request headers:", req.headers);
-    console.log("NODE_ENV:", process.env.NODE_ENV);
+    // Keep essential logging for production monitoring
+    if (process.env.NODE_ENV === "production") {
+      console.log(`Creating order for userId: ${userId}`);
+    }
     
     if (!userId) {
-      console.log("No userId found in request");
       throw new UnauthorizedError("User not authenticated");
     }
-
-    console.log("Creating order for userId:", userId);
 
     // Validate the request data using Zod schema
     let validatedData: CreateOrderRequest;
