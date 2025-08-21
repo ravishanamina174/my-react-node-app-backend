@@ -118,6 +118,8 @@ var allowedOrigins = [
 if (process.env.FRONTEND_URL) {
     allowedOrigins.push(process.env.FRONTEND_URL);
 }
+// Log allowed origins for debugging
+console.log('CORS allowed origins:', allowedOrigins);
 app.use((0, cors_1.default)({
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
