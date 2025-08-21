@@ -29,8 +29,23 @@ if (CLERK_ENABLED) {
     "Clerk keys not set or not in production; auth middleware disabled. Set CLERK_SECRET_KEY and CLERK_PUBLISHABLE_KEY and NODE_ENV=production to enable."
   );
 }
-const FRONTEND_URL = process.env.FRONTEND_URL;
-app.use(cors({ origin: FRONTEND_URL ? FRONTEND_URL : "*" }));
+const allowedOrigins = [
+  "http://localhost:5173", // local frontend
+  "https://my-frontend-r.netlify.app", // deployed frontend
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 // Stripe routes are mounted only if a secret key is present
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
