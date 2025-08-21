@@ -89,16 +89,86 @@ var app = (0, express_1.default)();
 var CLERK_ENABLED = Boolean(process.env.CLERK_SECRET_KEY &&
     process.env.CLERK_PUBLISHABLE_KEY &&
     process.env.NODE_ENV === "production");
+console.log("=== Environment Configuration Debug ===");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("CLERK_SECRET_KEY exists:", !!process.env.CLERK_SECRET_KEY);
+console.log("CLERK_PUBLISHABLE_KEY exists:", !!process.env.CLERK_PUBLISHABLE_KEY);
+console.log("CLERK_ENABLED:", CLERK_ENABLED);
+console.log("PORT:", process.env.PORT);
+console.log("=====================================");
 if (CLERK_ENABLED) {
-    app.use((0, express_2.clerkMiddleware)());
-    console.log("Clerk middleware enabled");
+    try {
+        // Configure Clerk middleware with proper options
+        app.use((0, express_2.clerkMiddleware)());
+        console.log("Clerk middleware enabled with basic configuration");
+        console.log("Clerk middleware enabled successfully");
+        console.log("CLERK_SECRET_KEY exists:", !!process.env.CLERK_SECRET_KEY);
+        console.log("CLERK_PUBLISHABLE_KEY exists:", !!process.env.CLERK_PUBLISHABLE_KEY);
+        console.log("NODE_ENV:", process.env.NODE_ENV);
+        // Add a test endpoint to verify Clerk middleware is working
+        app.get("/test-clerk", function (req, res) {
+            console.log("Testing Clerk middleware...");
+            console.log("req.auth:", req.auth);
+            console.log("req.auth type:", typeof req.auth);
+            console.log("req.auth is function:", typeof req.auth === 'function');
+            if (req.auth && typeof req.auth === 'function') {
+                try {
+                    var authData = req.auth();
+                    console.log("Auth function result:", authData);
+                    res.json({
+                        success: true,
+                        message: "Clerk middleware working",
+                        authData: authData,
+                        authType: typeof req.auth
+                    });
+                }
+                catch (error) {
+                    console.log("Error calling auth function:", error);
+                    res.json({
+                        success: false,
+                        message: "Error calling auth function",
+                        error: error.message,
+                        authType: typeof req.auth
+                    });
+                }
+            }
+            else {
+                res.json({
+                    success: false,
+                    message: "Clerk middleware not working properly",
+                    auth: req.auth,
+                    authType: typeof req.auth
+                });
+            }
+        });
+    }
+    catch (error) {
+        console.error("Failed to enable Clerk middleware:", error);
+        console.warn("Continuing without Clerk middleware - authentication will fail");
+    }
 }
 else {
     // eslint-disable-next-line no-console
     console.warn("Clerk keys not set or not in production; auth middleware disabled. Set CLERK_SECRET_KEY and CLERK_PUBLISHABLE_KEY and NODE_ENV=production to enable.");
+    console.log("CLERK_SECRET_KEY exists:", !!process.env.CLERK_SECRET_KEY);
+    console.log("CLERK_PUBLISHABLE_KEY exists:", !!process.env.CLERK_PUBLISHABLE_KEY);
+    console.log("NODE_ENV:", process.env.NODE_ENV);
 }
-var FRONTEND_URL = process.env.FRONTEND_URL;
-app.use((0, cors_1.default)({ origin: FRONTEND_URL ? FRONTEND_URL : "*" }));
+var allowedOrigins = [
+    "http://localhost:5173", // local frontend
+    "https://my-frontend-r.netlify.app", // deployed frontend
+];
+app.use((0, cors_1.default)({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true,
+}));
 // Stripe routes are mounted only if a secret key is present
 var STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 if (STRIPE_SECRET_KEY) {
@@ -131,6 +201,19 @@ app.listen(PORT, function () {
 // Simple health check for Postman / uptime checks
 app.get("/health", function (req, res) {
     res.status(200).json({ status: "ok" });
+});
+// Authentication health check
+app.get("/health/auth", function (req, res) {
+    res.status(200).json({
+        status: "ok",
+        authentication: {
+            clerkEnabled: CLERK_ENABLED,
+            nodeEnv: process.env.NODE_ENV,
+            clerkSecretExists: !!process.env.CLERK_SECRET_KEY,
+            clerkPublishableExists: !!process.env.CLERK_PUBLISHABLE_KEY,
+            timestamp: new Date().toISOString()
+        }
+    });
 });
 // Test endpoint to verify backend is working
 app.get("/api/test", function (req, res) {

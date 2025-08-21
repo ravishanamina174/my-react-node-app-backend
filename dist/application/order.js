@@ -73,7 +73,13 @@ var createOrder = function (req, res, next) { return __awaiter(void 0, void 0, v
                 _a.trys.push([0, 3, , 4]);
                 data = req.body;
                 userId = req.userId;
+                console.log("=== Order Creation Debug ===");
+                console.log("Request userId:", userId);
+                console.log("Request body:", JSON.stringify(data, null, 2));
+                console.log("Request headers:", req.headers);
+                console.log("NODE_ENV:", process.env.NODE_ENV);
                 if (!userId) {
+                    console.log("No userId found in request");
                     throw new unauthorized_error_1.default("User not authenticated");
                 }
                 console.log("Creating order for userId:", userId);

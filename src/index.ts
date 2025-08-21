@@ -20,14 +20,72 @@ const CLERK_ENABLED = Boolean(
   process.env.NODE_ENV === "production"
 );
 
+console.log("=== Environment Configuration Debug ===");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("CLERK_SECRET_KEY exists:", !!process.env.CLERK_SECRET_KEY);
+console.log("CLERK_PUBLISHABLE_KEY exists:", !!process.env.CLERK_PUBLISHABLE_KEY);
+console.log("CLERK_ENABLED:", CLERK_ENABLED);
+console.log("PORT:", process.env.PORT);
+console.log("=====================================");
+
 if (CLERK_ENABLED) {
-  app.use(clerkMiddleware());
-  console.log("Clerk middleware enabled");
+  try {
+    // Configure Clerk middleware with proper options
+    app.use(clerkMiddleware());
+    console.log("Clerk middleware enabled with basic configuration");
+    console.log("Clerk middleware enabled successfully");
+    console.log("CLERK_SECRET_KEY exists:", !!process.env.CLERK_SECRET_KEY);
+    console.log("CLERK_PUBLISHABLE_KEY exists:", !!process.env.CLERK_PUBLISHABLE_KEY);
+    console.log("NODE_ENV:", process.env.NODE_ENV);
+    
+    // Add a test endpoint to verify Clerk middleware is working
+    app.get("/test-clerk", (req, res) => {
+      console.log("Testing Clerk middleware...");
+      console.log("req.auth:", req.auth);
+      console.log("req.auth type:", typeof req.auth);
+      console.log("req.auth is function:", typeof req.auth === 'function');
+      
+      if (req.auth && typeof req.auth === 'function') {
+        try {
+          const authData = (req.auth as any)();
+          console.log("Auth function result:", authData);
+          res.json({ 
+            success: true, 
+            message: "Clerk middleware working",
+            authData,
+            authType: typeof req.auth
+          });
+        } catch (error) {
+          console.log("Error calling auth function:", error);
+          res.json({ 
+            success: false, 
+            message: "Error calling auth function",
+            error: (error as any).message,
+            authType: typeof req.auth
+          });
+        }
+      } else {
+        res.json({ 
+          success: false, 
+          message: "Clerk middleware not working properly",
+          auth: req.auth,
+          authType: typeof req.auth
+        });
+      }
+    });
+    
+  } catch (error) {
+    console.error("Failed to enable Clerk middleware:", error);
+    console.warn("Continuing without Clerk middleware - authentication will fail");
+  }
 } else {
   // eslint-disable-next-line no-console
   console.warn(
     "Clerk keys not set or not in production; auth middleware disabled. Set CLERK_SECRET_KEY and CLERK_PUBLISHABLE_KEY and NODE_ENV=production to enable."
   );
+  console.log("CLERK_SECRET_KEY exists:", !!process.env.CLERK_SECRET_KEY);
+  console.log("CLERK_PUBLISHABLE_KEY exists:", !!process.env.CLERK_PUBLISHABLE_KEY);
+  console.log("NODE_ENV:", process.env.NODE_ENV);
 }
 const allowedOrigins = [
   "http://localhost:5173", // local frontend
@@ -85,6 +143,20 @@ app.listen(PORT, () => {
 // Simple health check for Postman / uptime checks
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
+});
+
+// Authentication health check
+app.get("/health/auth", (req, res) => {
+  res.status(200).json({ 
+    status: "ok",
+    authentication: {
+      clerkEnabled: CLERK_ENABLED,
+      nodeEnv: process.env.NODE_ENV,
+      clerkSecretExists: !!process.env.CLERK_SECRET_KEY,
+      clerkPublishableExists: !!process.env.CLERK_PUBLISHABLE_KEY,
+      timestamp: new Date().toISOString()
+    }
+  });
 });
 
 // Test endpoint to verify backend is working
