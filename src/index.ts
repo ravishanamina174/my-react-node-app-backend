@@ -7,6 +7,7 @@ import { connectDB } from "./infrastructure/db/index";
 import globalErrorHandlingMiddleware from "./api/middleware/global-error-handling-middleware";
 import cors from "cors";
 import { orderRouter } from "./api/order";
+import { salesRouter } from "./api/sales";
 import { clerkMiddleware } from "@clerk/express";
 import bodyParser from "body-parser";
 import colorRouter from "./api/color";
@@ -108,6 +109,7 @@ app.use("/api/products", productRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/orders", orderRouter);
+app.use("/api/sales", salesRouter);
 app.use("/api/colors", colorRouter);
 app.use(globalErrorHandlingMiddleware);
 
