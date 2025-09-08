@@ -21,8 +21,8 @@
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
     "mongodb": "^6.17.0",
-    "mongoose": "^8.17.1",
-    "stripe": "^18.4.0",
+    "mongoose": "^8.18.0",
+    "stripe": "^18.5.0",
     "zod": "^4.0.2"
   },
   "devDependencies": {

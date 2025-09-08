@@ -54,6 +54,12 @@ const productSchema = new mongoose.Schema({
     ref: "Color",
     required: false,
   },
+  // colors: {
+  //   type: [mongoose.Schema.Types.ObjectId],
+  //   ref: "Color",
+  //   default: [],
+  //   required: false,
+  // },
 });
 
 const Product = mongoose.model("Product", productSchema);

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const colorSchema = new mongoose.Schema({
-  name: { 
+  colors: { 
     type: String,
     required: true 
   },
@@ -9,7 +9,8 @@ const colorSchema = new mongoose.Schema({
     type: String,
     required: true 
   },
-}, { timestamps: true });
+});
+
 
 const Color = mongoose.model("Color", colorSchema);
 
