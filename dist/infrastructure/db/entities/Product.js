@@ -58,6 +58,12 @@ var productSchema = new mongoose_1.default.Schema({
         ref: "Color",
         required: false,
     },
+    // colors: {
+    //   type: [mongoose.Schema.Types.ObjectId],
+    //   ref: "Color",
+    //   default: [],
+    //   required: false,
+    // },
 });
 var Product = mongoose_1.default.model("Product", productSchema);
 exports.default = Product;

@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose_1 = __importDefault(require("mongoose"));
 var colorSchema = new mongoose_1.default.Schema({
-    name: {
+    colors: {
         type: String,
         required: true
     },
@@ -13,7 +13,7 @@ var colorSchema = new mongoose_1.default.Schema({
         type: String,
         required: true
     },
-}, { timestamps: true });
+});
 var Color = mongoose_1.default.model("Color", colorSchema);
 exports.default = Color;
 //# sourceMappingURL=Color.js.map
