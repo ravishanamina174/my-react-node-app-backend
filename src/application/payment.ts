@@ -42,12 +42,9 @@ async function fulfillCheckout(sessionId: string) {
     throw new Error("Order not found");
   }
 
-  if (order.paymentStatus !== "pending") {
-    throw new Error("Payment is not pending");
-  }
-
-  if (order.status !== "pending") {
-    throw new Error("Order is not pending");
+  // Idempotency: if already processed, exit early
+  if (order.paymentStatus === "paid" || order.status !== "pending") {
+    return;
   }
 
   // Check the Checkout Session's payment_status property
@@ -260,7 +257,10 @@ export const retrieveSessionStatus = async (req: Request, res: Response) => {
   }
   
   res.send({
+    orderId: order._id,
     status: checkoutSession.status,
     customer_email: checkoutSession.customer_details?.email,
+    orderStatus: order.status,
+    paymentStatus: order.paymentStatus,
   });
 };

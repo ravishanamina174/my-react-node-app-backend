@@ -13,6 +13,28 @@ import bodyParser from "body-parser";
 import colorRouter from "./api/color";
 
 const app = express();
+// Ensure Stripe webhook uses raw body BEFORE JSON body parser
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+if (STRIPE_SECRET_KEY) {
+  // Mount early to guarantee raw body is available to Stripe signature verification
+  app.post(
+    "/api/stripe/webhook",
+    bodyParser.raw({ type: "application/json" }),
+    async (req, res) => {
+      const { handleWebhook } = await import("./application/payment");
+      return handleWebhook(req as any, res as any);
+    }
+  );
+  app.post(
+    "/api/payments/webhook",
+    bodyParser.raw({ type: "application/json" }),
+    async (req, res) => {
+      const { handleWebhook } = await import("./application/payment");
+      return handleWebhook(req as any, res as any);
+    }
+  );
+}
+
 
 // Make Clerk optional when env vars are not provided
 const CLERK_ENABLED = Boolean(
@@ -84,17 +106,8 @@ app.use(
   })
 );
 
-// Stripe routes are mounted only if a secret key is present
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+// Stripe routes (regular JSON endpoints)
 if (STRIPE_SECRET_KEY) {
-  // Dynamic imports avoid crashing startup if Stripe is not configured
-  import("./application/payment").then(({ handleWebhook }) => {
-    app.post(
-      "/api/payments/webhook",
-      bodyParser.raw({ type: "application/json" }),
-      handleWebhook
-    );
-  });
   import("./api/payment").then(({ paymentsRouter }) => {
     app.use("/api/payments", paymentsRouter);
   });

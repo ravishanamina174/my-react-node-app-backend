@@ -39,12 +39,14 @@ const createProductsForCategory = async (categoryId: any, categoryName: string) 
       },
     });
 
+    const imageUrl = `https://via.placeholder.com/150?text=${encodeURIComponent(categoryName)}`;
     products.push({
       categoryId,
       name: name,
       price: price,
       description: description,
-      image: `https://via.placeholder.com/150?text=${encodeURIComponent(categoryName)}`,
+      image: imageUrl,
+      images: [imageUrl],
       stock: Math.floor(Math.random() * 50) + 1,
       reviews: [],
       stripePriceId: stripeProduct.default_price
